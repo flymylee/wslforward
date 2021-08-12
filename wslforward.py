@@ -45,11 +45,11 @@ def scan_params():
 
     if sys.argv[i] == "-s":
       global _port_source
-      _distro = sys.argv[i+1]
+      _port_source = sys.argv[i+1]
 
     elif sys.argv[i] == "-p":
       global _port_dest
-      _username = sys.argv[i+1]
+      _port_dest = sys.argv[i+1]
 
 
 # Showing How to use this application.
