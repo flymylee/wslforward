@@ -26,7 +26,7 @@ class Worker(Thread):
 # Global variables
 
 _distro = ""
-_username = ""
+_username = "root"
 _port_source = "22"
 _port_dest = "22"
 
@@ -102,8 +102,7 @@ local_ip = ip_pattern.search(ifconfig_result).group(1)
 
 
 def set_port_forwarding():
-  subprocess.run("powershell.exe Start-Process -Verb RunAs netsh.exe 'interface portproxy delete v4tov4 listenport=" + _port_source + " listenaddress=0.0.0.0'")
-  subprocess.run("powershell.exe Start-Process -Verb RunAs netsh.exe 'interface portproxy add v4tov4 listenport=" + _port_source + " listenaddress=0.0.0.0 connectport=" + _port_dest + " connectaddress=" + local_ip + "'")
+  subprocess.run("powershell.exe Start-Process -Verb RunAs netsh.exe 'interface portproxy set v4tov4 listenport=" + _port_source + " listenaddress=0.0.0.0 connectport=" + _port_dest + " connectaddress=" + local_ip + "'")
 
 worker2 = Worker(set_port_forwarding)   # "Update Port Forward"
 worker2.start()
