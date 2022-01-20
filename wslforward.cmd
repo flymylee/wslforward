@@ -7,11 +7,11 @@ SetLocal EnableDelayedExpansion
 REM  --> Set variables as your envirionment
 SET _Distro=
 SET _Username=
-SET _Port_Ingress=22
+SET _Port_Ingress=
 SET _Port_Egress=%_Port_Ingress%
+SET _Intranet_Address=
 FOR /F "tokens=*" %%g IN ('wsl -d %_Distro% -u %_Username% bash -c "ip -4 addr | sed -ne 's|^.* inet \([^/]*\)/.* scope global.*$|\1|p' | head -1"') do (SET _WSL_IP=%%g)
 FOR /F "tokens=3 delims=: " %%g IN ('netsh interface portproxy show v4tov4 ^| findstr 0.0.0.0') do (SET _OLD_IP=%%g)
-
 
 @REM REM  --> @REM is the codes for debugging
 @REM :-------------------------------------
@@ -19,7 +19,6 @@ FOR /F "tokens=3 delims=: " %%g IN ('netsh interface portproxy show v4tov4 ^| fi
 @REM   ECHO Update WSL Port Forward
 @REM   ECHO wslforward.cmd [-d ^<Distro^>] [-u ^<Username^>] [-s SOURCE_PORT] [-p DEST_PORT]
 @REM :-------------------------------------
-
 
 :: Check for envirionment
 :-------------------------------------
@@ -32,6 +31,9 @@ FOR /F "tokens=3 delims=: " %%g IN ('netsh interface portproxy show v4tov4 ^| fi
 :Main
 REM  --> Check for existing OpenSSL
 >nul 2>&1 netsh.exe interface portproxy set v4tov4 protocol=tcp listenport=%_Port_Ingress% listenaddress=0.0.0.0 connectport=%_Port_Egress% connectaddress=%_WSL_IP%
+for %%I IN (%*) DO (
+  >nul 2>&1 netsh.exe interface portproxy set v4tov4 protocol=tcp listenport=%%I listenaddress=%_Intranet_Address% connectport=%%I connectaddress=%_WSL_IP%
+)
 
 REM  --> Check for permissions
 IF DEFINED ProgramFiles(x86) IF /I "%PROCESSOR_ARCHITECTURE%" EQU "x86" (
@@ -43,9 +45,9 @@ IF DEFINED ProgramFiles(x86) IF /I "%PROCESSOR_ARCHITECTURE%" EQU "x86" (
 REM --> If error flag set, you do not have admin.
 IF '%ErrorLevel%' NEQ '0' (
   echo Requesting administrative privileges...
-  GoTo UACPrompt
+  GoTo :UACPrompt
 ) ELSE (
-  GoTo gotAdmin
+  GoTo :gotAdmin
 )
 
 GoTo :CLEAR_TEMP
